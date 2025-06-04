@@ -17,7 +17,8 @@ This is the official repository of the paper "Conditional Balance: Improving Mul
 
 
 # Updates
-[2025 June] Conditional Balance's SDXL Analysis code is officially released! visit the following link: [Analysis Code](https://github.com/Nadavc220/conditional-balance-analysis). 
+[2025 June] Conditional Balance's SDXL Analysis code is officially released! visit the following link: [Analysis Code](https://github.com/Nadavc220/conditional-balance-analysis).
+
 [2025 April] Conditional Balance's SDXL inference code is officially released!
 
 ### TODOs
