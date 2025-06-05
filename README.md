@@ -17,6 +17,8 @@ This is the official repository of the paper "Conditional Balance: Improving Mul
 
 
 # Updates
+[2025 June] Conditional Balance's SD3.5-Large Inference code is officially released! visit the following link: [SD3.5 Inference](https://github.com/Nadavc220/conditional-balance-sd35).
+
 [2025 June] Conditional Balance's SDXL Analysis code is officially released! visit the following link: [Analysis Code](https://github.com/Nadavc220/conditional-balance-analysis).
 
 [2025 April] Conditional Balance's SDXL inference code is officially released!
@@ -24,7 +26,7 @@ This is the official repository of the paper "Conditional Balance: Improving Mul
 ### TODOs
 - [x] SDXL balanced inference Code.
 - [x] Analysis Code
-- [ ] Stable-Diffusion3.5 balanced Inference Code.
+- [x] Stable-Diffusion3.5 balanced Inference Code.
 
 # Environment Setup
 We recommend creating a conda environment with the latest library versions. In case issues arise, the library versions used in our experiments are mentioned below.
@@ -42,7 +44,11 @@ pip install opencv-python                  # version=4.11.0
 
 # Model Sensitivity Analysis
 For our model sensitivity analysis, visit the following link: [Analysis Code](https://github.com/Nadavc220/conditional-balance-analysis).
-# Inference
+
+# Inference (SDXL)
+
+### SD3.5 Inference
+For SD3.5-Large inference code, visit the following link: [SD3.5 Inference](https://github.com/Nadavc220/conditional-balance-sd35).
 
 ### Text Conditioned
 The following call can be used to generate text-conditioned images:
