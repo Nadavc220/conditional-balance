@@ -60,7 +60,6 @@ python style_gen_img.py --seed 25 \
                         --lambda_s 0.43 \
                         --num_images_per_prompt 1 \
                         --output_path "outputs" \
-                        --initialize_latents
 ```
 ![text_only](assets/text_only.png)
 
@@ -72,7 +71,7 @@ python style_gen_img.py --seed 10 \
                         --style_prompt "in the style of Vincent van-Gogh" \
                         --reference_prompt "An oil painting" \
                         --lambda_s 0.43 \
-                        --num_images_per_prompt 1 \
+                        --num_images_per_prompt 2 \
                         --output_path "outputs" \
 ```
 ![multi_text](assets/multi_txt.png)
@@ -87,7 +86,7 @@ python style_gen_img_canny.py --seed 112 \
                               --content_image_path "assets/panda.jpg" \
                               --lambda_s 0.57 \
                               --lambda_t 0.8 \
-                              --num_images_per_prompt 1 \
+                              --num_images_per_prompt 2 \
                               --output_path "outputs" \
                               --initialize_latents
 ```

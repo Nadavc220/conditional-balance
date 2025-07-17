@@ -96,11 +96,13 @@ class SharedDynamicAttentionProcessor(DefaultAttentionProcessor):
         return hidden_states
     
 
-    def update_args(self, adain_keys=None, adain_quaries=None, share_attention=None):
+    def update_args(self, adain_keys=None, adain_quaries=None, adain_values=None, share_attention=None):
         if adain_keys is not None:
             self.adain_keys = adain_keys
         if adain_quaries is not None:
             self.adain_queries = adain_quaries
+        if adain_values is not None:
+            self.adain_values = adain_values
         if share_attention is not None:
             self.share_attention = share_attention
 
@@ -267,17 +269,21 @@ def register_shared_norm(pipeline: StableDiffusionXLPipeline,
 
 
 class Handler:
-    def __init__(self, pipeline: StableDiffusionXLPipeline, layer_stats: dict, num_style_layers: int):
+    def __init__(self, pipeline: StableDiffusionXLPipeline, layer_stats: dict, num_style_layers: int, approximate_timesteps: bool):
         self.pipeline = pipeline
         self.norm_layers = []
         self.layers_stats = layer_stats
         self.num_style_layers = num_style_layers
+        self.approximate_timesteps = approximate_timesteps
         
-        self.sorted_layers = {int(t): {'q': [], 'k': []} for t in self.layers_stats['stats']}
+        self.sorted_layers = {int(t): {'q': [], 'k': [], 'v': []} for t in self.layers_stats['stats']}
         for t in self.layers_stats['stats']:
             current_scores = self.layers_stats['stats'][int(t)]
             self.sorted_layers[t]['q'].append(np.argsort(current_scores['q'])[:self.num_style_layers])
             self.sorted_layers[t]['k'].append(np.argsort(current_scores['k'])[:self.num_style_layers])
+
+            if 'v' in current_scores.keys():
+                self.sorted_layers[t]['v'].append(np.argsort(current_scores['v'])[:self.num_style_layers])
         
 
     def register(self, style_aligned_args: StyleAlignedArgs):
@@ -293,19 +299,36 @@ class Handler:
 
 
     def update_adain_layers(self, t):
+        if int(t) not in self.sorted_layers.keys():
+            if self.approximate_timesteps:
+                new_idx = np.argmin(np.abs(np.array(list(self.sorted_layers.keys())) - np.array([t.item()] * len(self.sorted_layers.keys()))))
+                t = list(self.sorted_layers.keys())[new_idx]
+            else:
+                print(f"Timestep {t} was not analyzed in current grading file. If you wish to use closest timestep instead of ones missing from the grading, use the '--approximate_timesteps' flag.")
+                exit(-1)
+
         if len(self.sorted_layers[int(t)]['q']) > 0 or len(self.sorted_layers[int(t)]['k']) > 0:
             layer_names = self.layers_stats['layer_names']
             cummulative_top_q = list(set(functools.reduce(lambda l1, l2: np.concatenate([l1, l2], axis=0), self.sorted_layers[int(t)]['q'])))
-            cummulative_top_k = list(set(functools.reduce(lambda l1, l2: np.concatenate([l1, l2], axis=0), self.sorted_layers[int(t)]['k'])))
             q_layers = np.array(layer_names)[cummulative_top_q] if len(cummulative_top_q) > 0 else []
+
+            cummulative_top_k = list(set(functools.reduce(lambda l1, l2: np.concatenate([l1, l2], axis=0), self.sorted_layers[int(t)]['k'])))
             k_layers = np.array(layer_names)[cummulative_top_k] if len(cummulative_top_k) > 0 else []
+
+            v_layers = []
+            if self.sorted_layers[int(t)]['v'] != []:
+                cummulative_top_v = list(set(functools.reduce(lambda l1, l2: np.concatenate([l1, l2], axis=0), self.sorted_layers[int(t)]['v'])))
+                v_layers = np.array(layer_names)[cummulative_top_v] if len(cummulative_top_v) > 0 else []  # TODO: Check that is 0 when using regular method                
+
 
             attention_layers = self.self_attention_layers
             for layer_name in layer_names:
-                adain_q, adain_k = False, False
+                adain_q, adain_k, adain_v = False, False, False
                 if layer_name in q_layers:
                     adain_q = True
                 if layer_name in k_layers:
                     adain_k = True
+                if layer_name in v_layers:
+                    adain_v=True
                 share_attention = adain_q or adain_k
-                attention_layers[layer_name].update_args(adain_keys=adain_k, adain_quaries=adain_q, share_attention=share_attention)
+                attention_layers[layer_name].update_args(adain_keys=adain_k, adain_quaries=adain_q, adain_values=adain_v, share_attention=share_attention)

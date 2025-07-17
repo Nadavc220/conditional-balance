@@ -28,7 +28,8 @@ def main(args):
     # Load DDPM and Handler
     controlnet = load_controlnet(CONTROL_TYPE, device=device)
     pipeline = load_ddpm(controlnet, device=device)
-    infer_pipeline = create_infer_model(pipeline, num_style_layers=args.num_style_layers, controlnet_model=True, controlnet_removal_amount=args.controlnet_removal_amount)
+    infer_pipeline = create_infer_model(pipeline, num_style_layers=args.num_style_layers, controlnet_model=True, controlnet_removal_amount=args.controlnet_removal_amount,
+                                        balance_values=args.balance_values, approximate_timesteps=args.approximate_timesteps)
     
     # Init output path
     args.output_path = os.path.join(args.output_path, CONTROL_TYPE, str(args.seed))
@@ -84,9 +85,11 @@ if __name__ == "__main__":
     parser.add_argument("--no_control_output", action="store_true")
     parser.add_argument("--lambda_s", default=0.43, type=float)
     parser.add_argument("--lambda_t", default=0.85, type=float)
+    parser.add_argument("--balance_values", action='store_true')
     parser.add_argument("--num_images_per_prompt", type=int, default=1)
     parser.add_argument("--num_inference_steps", type=int, default=50)
     parser.add_argument("--initialize_latents", action='store_true')
+    parser.add_argument("--approximate_timesteps", action='store_true')
     parser.add_argument("--output_path")
     args = parser.parse_args()
     

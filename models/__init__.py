@@ -6,12 +6,15 @@ from models.sdxl_controlnet_balanced import StableDiffusionXLControlNetBalancedP
 from models.sdxl_balanced import StableDiffusionXLBalancedPipeline
 
 
-def create_infer_model(pipeline, num_style_layers, controlnet_model=False, controlnet_removal_amount=0):
+def create_infer_model(pipeline, num_style_layers, controlnet_model=False, controlnet_removal_amount=0, balance_values=False, approximate_timesteps=False):
     handler_args = FALSE_SA_ARGS
     handler_cls = get_handler()
 
-    style_stats = torch.load("grading_files/style_layer_grading", weights_only=False)
-    handler = handler_cls(pipeline, style_stats, num_style_layers)
+    if balance_values:
+        style_stats = torch.load("grading_files/style_balance_grading_v", weights_only=False)
+    else:
+        style_stats = torch.load("grading_files/style_layer_grading", weights_only=False)
+    handler = handler_cls(pipeline, style_stats, num_style_layers, approximate_timesteps)
     handler.register(handler_args)
     
     if controlnet_model:

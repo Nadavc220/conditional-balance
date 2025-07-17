@@ -17,7 +17,8 @@ def main(args):
 
     # Load DDPM and Handler
     pipeline = load_ddpm(device=device)
-    infer_pipeline = create_infer_model(pipeline, args.num_style_layers, controlnet_model=False)
+    infer_pipeline = create_infer_model(pipeline, args.num_style_layers, controlnet_model=False,
+                                        balance_values=args.balance_values, approximate_timesteps=args.approximate_timesteps)
     
     # Init output path
     args.output_path = os.path.join(args.output_path, 'text', str(args.seed))
@@ -53,9 +54,11 @@ if __name__ == "__main__":
     parser.add_argument("--style_prompt", type=str)
     parser.add_argument("--reference_prompt", type=str)
     parser.add_argument('--lambda_s', default=0.43, type=float)
+    parser.add_argument("--balance_values", action='store_true')
     parser.add_argument("--num_images_per_prompt", type=int, default=1)
     parser.add_argument("--num_inference_steps", type=int, default=50)
     parser.add_argument("--initialize_latents", action='store_true')
+    parser.add_argument("--approximate_timesteps", action='store_true')
     parser.add_argument('--output_path', default='./outputs')
     args = parser.parse_args()
 
